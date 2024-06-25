@@ -50,12 +50,12 @@ internal static class ItemUtil
             WinchCore.Log.Error($"Meta file {metaPath} is empty");
             return;
         }
+        var item = UtilHelpers.GetScriptableObjectFromMeta<T>(meta, metaPath);
         if (AllItemDataDict.ContainsKey((string)meta["id"]))
         {
             WinchCore.Log.Error($"Duplicate item {(string)meta["id"]} at {metaPath} failed to load");
             return;
         }
-        var item = UtilHelpers.GetScriptableObjectFromMeta<T>(meta, metaPath);
         if (UtilHelpers.PopulateObjectFromMeta<T>(item, meta, Converters))
         {
             GameManager.Instance.ItemManager.allItems.Add(item);
