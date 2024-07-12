@@ -9,21 +9,21 @@ using Winch.Util;
 
 namespace Winch.Core
 {
-    class ModAssembly
+    public class ModAssembly
     {
-        public readonly string BasePath;
-        public Dictionary<string, object> Metadata;
+        public readonly string ModFolderPath;
+        public Dictionary<string, object> ModMetadata;
         public Assembly? LoadedAssembly;
 
         private ModAssembly(string basePath) {
-            BasePath = basePath;
+            ModFolderPath = basePath;
 
             string metaPath = Path.Combine(basePath, "mod_meta.json");
             if (!File.Exists(metaPath))
                 throw new FileNotFoundException("Missing mod_meta.json file.");
 
             string metaText = File.ReadAllText(metaPath);
-            Metadata = JsonConvert.DeserializeObject<Dictionary<string, object>>(metaText) ?? throw new InvalidOperationException("Unable to parse mod_meta.json file.");
+            ModMetadata = JsonConvert.DeserializeObject<Dictionary<string, object>>(metaText) ?? throw new InvalidOperationException("Unable to parse mod_meta.json file.");
         }
 
         internal static ModAssembly FromPath(string path)
@@ -34,11 +34,11 @@ namespace Winch.Core
         
         internal void LoadAssembly()
         {
-            if (!Metadata.ContainsKey("ModAssembly"))
+            if (!ModMetadata.ContainsKey("ModAssembly"))
                 throw new MissingFieldException("Property 'ModAssembly' not found in mod_meta.json");
 
-            string assemblyName = Metadata["ModAssembly"].ToString();
-            string assemblyPath = Path.Combine(BasePath, assemblyName);
+            string assemblyName = ModMetadata["ModAssembly"].ToString();
+            string assemblyPath = Path.Combine(ModFolderPath, assemblyName);
             if(!File.Exists(assemblyPath))
                 throw new FileNotFoundException($"Could not find mod assembly '{assemblyPath}'");
 
@@ -48,7 +48,7 @@ namespace Winch.Core
 
             WinchCore.Log.Debug($"Loaded Assembly '{LoadedAssembly.GetName().Name}'.");
 
-			if (Metadata.ContainsKey("Preload"))
+			if (ModMetadata.ContainsKey("Preload"))
 			{
 				ProcessPreload();
 			}
@@ -61,32 +61,32 @@ namespace Winch.Core
 
             WinchCore.Log.Debug($"Initializing ModAssembly {LoadedAssembly.GetName().Name}...");
 
-            if (Metadata.ContainsKey("DefaultConfig"))
+            if (ModMetadata.ContainsKey("DefaultConfig"))
                 ProcessDefaultConfig();
 
-            if (Metadata.ContainsKey("Dependencies"))
+            if (ModMetadata.ContainsKey("Dependencies"))
                 ProcessDependencies();
 
-            if (Metadata.ContainsKey("Entrypoint"))
+            if (ModMetadata.ContainsKey("Entrypoint"))
                 ProcessEntrypoint();
         }
 
         internal void CheckCompatibility()
         {
 
-            if (!Metadata.ContainsKey("Version"))
+            if (!ModMetadata.ContainsKey("Version"))
                 throw new MissingFieldException("No 'Version' field found in Mod Metadata.");
-            else if (!VersionUtil.ValidateVersion(Metadata["Version"].ToString()))
+            else if (!VersionUtil.ValidateVersion(ModMetadata["Version"].ToString()))
                 throw new FormatException("Mod Version has invalid format.");
 
-            if (!Metadata.ContainsKey("ModGUID"))
+            if (!ModMetadata.ContainsKey("ModGUID"))
                 throw new MissingFieldException("No 'ModGUID' field found in Mod Metadata.");
 
-            if (!Metadata.ContainsKey("MinWinchVersion"))
+            if (!ModMetadata.ContainsKey("MinWinchVersion"))
                 WinchCore.Log.Warn($"No MinWinchVersion defined. Mod will load anyway, but version conflicts may occur!");
             else
             {
-                string minVer = Metadata["MinWinchVersion"].ToString();
+                string minVer = ModMetadata["MinWinchVersion"].ToString();
                 string winchVer = VersionUtil.GetVersion();
 
                 if (!VersionUtil.ValidateVersion(minVer))
@@ -101,7 +101,7 @@ namespace Winch.Core
 
         private void ProcessDependencies()
         {
-            string[] deps = ((JArray)Metadata["Dependencies"]).ToObject<string[]>() ?? Array.Empty<string>();
+            string[] deps = ((JArray)ModMetadata["Dependencies"]).ToObject<string[]>() ?? Array.Empty<string>();
             foreach (string dep in deps)
             {
                 WinchCore.Log.Debug($"Processing dependency {dep}");
@@ -113,14 +113,14 @@ namespace Winch.Core
 
         private void ProcessDefaultConfig()
         {
-            string defaultConfig = JsonConvert.SerializeObject(Metadata["DefaultConfig"], Formatting.Indented);
-            string modName = Path.GetFileName(BasePath);
+            string defaultConfig = JsonConvert.SerializeObject(ModMetadata["DefaultConfig"], Formatting.Indented);
+            string modName = Path.GetFileName(ModFolderPath);
             ModConfig.RegisterDefaultConfig(modName, defaultConfig);
         }
 
         private void ProcessEntrypoint()
         {
-            string entrypointSetting = Metadata["Entrypoint"].ToString();
+            string entrypointSetting = ModMetadata["Entrypoint"].ToString();
             if (!entrypointSetting.Contains("/"))
                 throw new ArgumentException("Malformed Entrypoint in mod_meta.json");
 
@@ -138,7 +138,7 @@ namespace Winch.Core
 
 		private void ProcessPreload()
 		{
-			string preloadSetting = Metadata["Preload"].ToString();
+			string preloadSetting = ModMetadata["Preload"].ToString();
 			if (!preloadSetting.Contains("/"))
 				throw new ArgumentException("Malformed Preload in mod_meta.json");
 

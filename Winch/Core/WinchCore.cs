@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Winch.Logging;
 using Winch.Util;
@@ -16,6 +17,20 @@ namespace Winch.Core
 		public static Dictionary<string, object> WinchModConfig = new();
 
 		public static string WinchInstallLocation => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        public static string[] GetEnabledMods => ModAssemblyLoader.EnabledModAssemblies.Keys.ToArray();
+
+        public static bool TryGetModAssembly(string name, out ModAssembly mod)
+        {
+            if (ModAssemblyLoader.EnabledModAssemblies.TryGetValue(name, out mod))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
 		public static void Main()
         {
@@ -49,7 +64,7 @@ namespace Winch.Core
             {
                 try
                 {
-                    bool hasPatches = modAssembly.Metadata.ContainsKey("ApplyPatches") && (bool)modAssembly.Metadata["ApplyPatches"] == true;
+                    bool hasPatches = modAssembly.ModMetadata.ContainsKey("ApplyPatches") && (bool)modAssembly.ModMetadata["ApplyPatches"] == true;
                     if (modAssembly.LoadedAssembly != null && hasPatches)
                     {
                         Log.Debug($"Patching from {modAssembly.LoadedAssembly.GetName().Name}...");
@@ -58,7 +73,7 @@ namespace Winch.Core
                 }
                 catch(Exception ex)
                 {
-                    Log.Error($"Failed to apply patches for {modAssembly.BasePath}: {ex}");
+                    Log.Error($"Failed to apply patches for {modAssembly.ModFolderPath}: {ex}");
                 }
             }
 
