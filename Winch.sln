@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinchConsole", "WinchConsol
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinchCommon", "WinchCommon\WinchCommon.csproj", "{EF5F69E6-FD4D-4314-B187-A89D00BF9355}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winch.BepInExPlugin", "Winch.BepInExPlugin\Winch.BepInExPlugin.csproj", "{8601BE7D-3ED5-4863-B0D3-7BB7EF379E27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{EF5F69E6-FD4D-4314-B187-A89D00BF9355}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF5F69E6-FD4D-4314-B187-A89D00BF9355}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF5F69E6-FD4D-4314-B187-A89D00BF9355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8601BE7D-3ED5-4863-B0D3-7BB7EF379E27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8601BE7D-3ED5-4863-B0D3-7BB7EF379E27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8601BE7D-3ED5-4863-B0D3-7BB7EF379E27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8601BE7D-3ED5-4863-B0D3-7BB7EF379E27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
